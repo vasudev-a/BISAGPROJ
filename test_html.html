@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.1.1/css/ol.css" type="text/css">
+    <style>
+        .map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+    <script src="https://openlayers.org/en/v4.1.1/build/ol.js" type="text/javascript"></script>
+    <title>OpenLayers example</title>
+</head>
+<body>
+<h2>My Map</h2>
+<div id="map" class="map"></div>
+<form>
+    <select id="type" onchange="interaction()">
+        <option value="Point">Point</option>
+        <option value="LineString">LineString</option>
+        <option value="Polygon">Polygon</option>
+        <option value="Circle">Circle</option>
+    </select>
+</form>
+
+<script type="text/javascript">
+    var map = new ol.Map({
+        target: 'map',
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([72.636941, 23.215635]),
+            zoom: 4
+        })
+    });
+
+    var features = new ol.Collection();
+    var draw;
+
+    function interaction() {
+        interaction2();
+        draw = new ol.interaction.Draw({
+            features: features,
+            type: document.forms[0].elements[0].value
+        });
+        map.addInteraction(draw);
+    }
+
+    function interaction2(){
+        map.removeInteraction(draw);
+    }
+    console.log(document.forms[0].elements[0].value)
+
+</script>
+</body>
+</html>
