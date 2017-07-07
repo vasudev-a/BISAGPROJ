@@ -1,76 +1,41 @@
 package BISAG.Geom_Proj;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import it.geosolutions.geoserver.rest.*;
+import it.geosolutions.geoserver.rest.encoder.GSLayerEncoder;
+import it.geosolutions.geoserver.rest.encoder.coverage.GSImageMosaicEncoder;
+
 
 public class test {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IllegalArgumentException, MalformedURLException, FileNotFoundException {
+       
+        GeoServerRESTPublisher publisher = new GeoServerRESTPublisher("http://localhost:8080/geoserver", "admin", "geoserver");
+        //boolean pub = publisher.publishGeoTIFF("test", "myTIFF", new File("G:\\PS 1\\SATIMAGES\\FCC.tif")); //single tiff image
+        
+        
+        //***************************************
+        //multiple images as mosaic
+        // layer encoder
+       final GSLayerEncoder layerEnc = new GSLayerEncoder();
+        String style="raster";
+        layerEnc.setDefaultStyle(style);
 
-		Connection conn = null;
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String user = "postgres";
-		String password = "postgresql";
-		String url = "jdbc:postgresql://localhost:5432/postgres";
-		try {
-			conn = DriverManager.getConnection(url, user, password);
-			System.out.println(conn);
-		} catch (SQLException e) {
-			System.out.println(e);
-		}
-		
-		String query = "SELECT jsonb_build_object("+
-    "'type',     'FeatureCollection',"+
-    "'features', jsonb_agg(feature)) "+
-    "FROM ( "+
-    "SELECT jsonb_build_object( "+
-    "'type',       'Feature', "+
-    "'geometry',   ST_AsGeoJSON(geom_feat)::jsonb, "+
-    "'properties', to_jsonb(row) - 'geom_feat' "+
-    ") AS feature "+
-    "FROM (SELECT * FROM features) row) features; ";
-		Statement stmt = null;
-		try {
-			stmt = conn.createStatement();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		ResultSet rs = null;
-		System.out.println(query);
-		try{
-			rs = stmt.executeQuery(query);
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try {
-			while(rs.next())
-			{
-				try {
-					String st = rs.getString("jsonb_build_object");
-					System.out.println(st);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+       // coverage encoder
+       final GSImageMosaicEncoder coverageEnc=new GSImageMosaicEncoder();
+       coverageEnc.setName("DEMImageName");
+       coverageEnc.setTitle("DEMAnotherTitle_new");
+       coverageEnc.setMaxAllowedTiles(500); 
+
+       // ... many other options are supported
+
+       // create a new ImageMosaic layer...
+       final boolean published = publisher.publishExternalMosaic("test", "myDEM", new File("G:\\PS 1\\SATIMAGES\\DEM"), coverageEnc, layerEnc);
+         	
+       //*****************************
 	}
 }

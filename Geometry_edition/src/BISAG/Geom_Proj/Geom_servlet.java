@@ -30,11 +30,13 @@ public class Geom_servlet extends HttpServlet {
 		String usename = request.getParameter("top");
 		String name = request.getParameter("name");
 		String notes = request.getParameter("notes");
+		String id= request.getParameter("id");
+		System.out.println(id);
 		System.out.println(usename);
 		Geom_servlet gs = new Geom_servlet();
 		int err=0;
 		try {
-			err = gs.update_db(usename, name, notes);
+			err = gs.update_db(usename, name, notes, id);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println(e);
@@ -45,7 +47,7 @@ public class Geom_servlet extends HttpServlet {
 		System.out.println("Error Code: "+ err);
 	}
 	
-	public int update_db(String route, String name, String notes) throws ClassNotFoundException, SQLException{
+	public int update_db(String route, String name, String notes, String id) throws ClassNotFoundException, SQLException{
 		Connection conn;
 		Class.forName("org.postgresql.Driver");
 		String user = "postgres";
@@ -63,19 +65,7 @@ public class Geom_servlet extends HttpServlet {
 		String[] pro_route = gs.process_string(route);
 		for(int i =0;i<pro_route.length;i++){
 			String temp_route = pro_route[i];
-			if(temp_route.contains("POINT"))
-			{
-				query = "insert into features values('"+ name +"', '"+ notes +"', ST_GeomFromText('"+ temp_route +"', 4326));";
-				
-			}
-			if(temp_route.contains("POLYGON"))
-			{
-				query = "insert into polygon values('"+ name +"', '"+ notes +"', ST_GeomFromText('"+ temp_route +"', 4326));";
-			}
-			if(temp_route.contains("LINESTRING"))
-			{
-				query = "insert into linestring values('"+ name +"', '"+ notes +"', ST_GeomFromText('"+ temp_route +"', 4326));";
-			}
+			query = "insert into features_test values('"+ name +"', '"+ notes +"', '"+ id +"', ST_GeomFromText('"+ temp_route +"', 4326));";
 			Statement stmt = conn.createStatement();
 			System.out.println(query);
 			try{
